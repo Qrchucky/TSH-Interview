@@ -6,6 +6,10 @@ import es6Promise from "es6-promise";
 es6Promise.polyfill();
 
 export class App {
+  constructor() {
+    this.validInput = false;
+  }
+
   initializeApp() {
     // Pollyfills for IE11
     forEachPolyfill();
@@ -13,9 +17,21 @@ export class App {
 
     // Event handler for clicking on button
     $(".load-username").on("click", () => {
-      const userName = $(".username.input").val();
+      if (this.validInput) {
+        const userName = $(".username.input").val();
 
-      this.getDataFromAPI(userName);
+        this.getDataFromAPI(userName);
+      }
+    });
+
+    // Event handler for typing in text input
+    $(".input").on("keyup", e => {
+      this.handleInputChange(e);
+    });
+
+    // Event handler for pasting text in text input
+    $(".input").on("paste", e => {
+      this.handleInputChange(e);
     });
   }
 
@@ -33,6 +49,25 @@ export class App {
       });
   }
 
+  // Text input validation
+  handleInputChange(e) {
+    const inputValue = e.target.value;
+    const regex = /[a-z0-9-_]/g;
+
+    if (
+      inputValue !== "" &&
+      inputValue.match(regex) !== null &&
+      inputValue.match(regex).length === inputValue.length
+    ) {
+      this.validInput = true;
+      e.target.style.border = "1px solid #dbdbdb";
+    } else {
+      this.validInput = false;
+      e.target.style.border = "1px solid red";
+    }
+  }
+
+  // Update profile with fetched data
   updateProfile() {
     $("#profile-name").text($(".username.input").val());
     $("#profile-image").attr("src", this.profile.avatar_url);
