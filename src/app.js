@@ -21,6 +21,7 @@ export class App {
         const userName = $(".username.input").val();
 
         this.getDataFromAPI(userName);
+        this.addEventToHistory(userName);
       }
     });
 
@@ -47,6 +48,85 @@ export class App {
         console.log(error);
         alert("User not found");
       });
+  }
+
+  // Adding event to History Tab
+  addEventToHistory(userName) {
+    const eventTypes = ["PullRequestEvent", "PullRequestReviewCommentEvent"];
+
+    axios
+      .get(`https://api.github.com/users/${userName}/events/public`)
+      .then(response => {
+        const foundEvents = response.data.filter(event => {
+          if (eventTypes.includes(event.type)) {
+            return event;
+          }
+        });
+        this.populateHistoryList(foundEvents);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }
+
+  // Appending new event to the DOM
+  populateHistoryList(foundEvents) {
+    const monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ];
+
+    foundEvents.map(event => {
+      const d = new Date(event.created_at);
+
+      const date = `${
+        monthNames[d.getMonth()]
+      } ${d.getDate()}, ${d.getFullYear()}`;
+
+      const markup = `
+      <div class="timeline-item is-primary">
+        <div class="timeline-marker is-primary"></div>
+        <div class="timeline-content">
+          <p class="heading">${date}</p>
+          <div class="content">
+            <span class="gh-username">
+              <img
+                src="${event.actor.avatar_url}"
+              />
+              <a href="https://github.com/${event.actor.display_login}">${event.actor.display_login}</a>
+            </span>
+            ${event.payload.action}
+            <a href="${event.payload.pull_request.html_url}"
+              >pull request</a
+            >
+            <p class="repo-name">
+              <a href="https://github.com/${event.repo.name}"
+                >${event.repo.name}</a
+              >
+            </p>
+          </div>
+        </div>
+      </div>`;
+
+      document.querySelectorAll(".timeline-item").forEach(node => {
+        node.classList.remove("is-primary");
+        node.children[0].classList.remove("is-primary");
+      });
+
+      document
+        .querySelector("#user-timeline")
+        .insertAdjacentHTML("afterbegin", markup);
+    });
   }
 
   // Text input validation
