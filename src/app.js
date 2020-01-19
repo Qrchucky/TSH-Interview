@@ -1,6 +1,6 @@
 import "./assets/scss/app.scss";
-import $ from "cash-dom";
 import { forEachPolyfill, includesPolyfill } from "./polyfills";
+import $ from "cash-dom";
 import axios from "axios";
 import es6Promise from "es6-promise";
 es6Promise.polyfill();
@@ -18,6 +18,7 @@ export class App {
     // Event handler for clicking on button
     $(".load-username").on("click", () => {
       if (this.validInput) {
+        $("#spinner").removeClass("is-hidden");
         const userName = $(".username.input").val();
 
         this.getDataFromAPI(userName);
@@ -41,12 +42,14 @@ export class App {
     axios
       .get(`https://api.github.com/users/${userName}`)
       .then(response => {
+        $(".profile").removeClass("is-hidden");
         this.profile = response.data;
         this.updateProfile();
       })
       .catch(error => {
         console.log(error);
         alert("User not found");
+        $("#spinner").addClass("is-hidden");
       });
   }
 
@@ -63,9 +66,11 @@ export class App {
           }
         });
         this.populateHistoryList(foundEvents);
+        $("#spinner").addClass("is-hidden");
       })
       .catch(error => {
         console.log(error);
+        $("#spinner").addClass("is-hidden");
       });
   }
 
