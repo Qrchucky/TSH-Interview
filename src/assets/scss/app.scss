@@ -1,9 +1,22 @@
-@import "~bulma";
-@import "~bulma-timeline";
+@import "bulma";
+@import "bulma-timeline";
+@import "./media.scss";
 
 .navbar {
   border-bottom: 1px solid #eee;
   margin-bottom: 8px;
+}
+
+.profile-container {
+  @include desktop {
+    width: 30%;
+  }
+  @include tablet {
+    width: 50%;
+  }
+  @include phone {
+    width: 100%;
+  }
 }
 
 .content {
